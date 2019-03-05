@@ -24,6 +24,10 @@
 	"keywords": [],
 	"author": "Justin Maier <just.maier@gmail.com> (https://heyj.us/)",
 	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/justmaier/simple-mesh-net.git"
+	},
 	"dependencies": {
 		"lite-event-emitter": "git+https://github.com/justmaier/lite-event-emitter.git",
 		"webrtc-link": "git+https://github.com/JustMaier/webrtc-link.git"
