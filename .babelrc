@@ -1,0 +1,38 @@
+{
+	"env": {
+	  "es": {
+		"presets": [
+		  [
+			"@babel/preset-env",
+			{
+			  "targets": {
+				"browsers": [
+				  "last 1 Chrome versions"
+				]
+			  },
+			  "loose": false,
+			  "modules": false,
+			  "useBuiltIns": false
+			}
+		  ]
+		]
+	  },
+	  "cjs": {
+		"presets": [
+		  [
+			"@babel/preset-env",
+			{
+			  "targets": {
+				"browsers": [
+				  "last 1 Chrome versions"
+				]
+			  },
+			  "loose": false,
+			  "modules": false,
+			  "useBuiltIns": false
+			}
+		  ]
+		]
+	  }
+	}
+  }
