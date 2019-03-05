@@ -9,7 +9,7 @@ export const MeshPeerEvents = {
 export default class MeshPeer extends LiteEventEmitter {
     constructor(client, peerName, options) {
         super();
-        this.peerName = peerName;
+		this.peerName = peerName;
         this._peer = new WebRTCPeer({
             peerConnectionConfig: {
                 iceServers: [
@@ -46,15 +46,18 @@ export default class MeshPeer extends LiteEventEmitter {
             request.resolve(payload);
             clearTimeout(request.timeout);
             delete this._requests[id];
-        });
+		});
+
+		// PubSub
+		this.subscriptions = [];
     }
 
-    send(type, payload) {
+    send(type, payload, timeout = 10000) {
         const id = uuid();
         return new Promise((resolve, reject) => {
             this._requests[id] = {
                 resolve, reject,
-                timeout: setTimeout(() => reject('Request timed out'), 10000)
+                timeout: setTimeout(() => reject('Request timed out'), timeout)
             };
 
             this._peer.send(JSON.stringify({ id, type, payload }));

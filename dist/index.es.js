@@ -13,6 +13,18 @@ const raceToSuccess = promises => Promise.all(promises.map(p => {
 errors => Promise.reject(errors), // If '.all' rejected, we've got the result we wanted.
 val => Promise.resolve(val));
 
+const allSuccesses = promises => Promise.all(promises.map(p => {
+  return p.then(val => Promise.resolve({
+    type: 'success',
+    val
+  }), err => Promise.resolve({
+    type: 'error',
+    err
+  }));
+})).then( // If '.all' resolved, we went through all promises and have success or errors
+values => Promise.resolve(values.filter(x => x.type === 'success').map(x => x.val)) // we'll never have rejections.
+);
+
 class LiteEventEmitter {
     constructor(){
         this._handlers = {};
@@ -706,16 +718,18 @@ class MeshPeer extends LiteEventEmitter {
       request.resolve(payload);
       clearTimeout(request.timeout);
       delete this._requests[id];
-    });
+    }); // PubSub
+
+    this.subscriptions = [];
   }
 
-  send(type, payload) {
+  send(type, payload, timeout = 10000) {
     const id = uuid();
     return new Promise((resolve, reject) => {
       this._requests[id] = {
         resolve,
         reject,
-        timeout: setTimeout(() => reject('Request timed out'), 10000)
+        timeout: setTimeout(() => reject('Request timed out'), timeout)
       };
 
       this._peer.send(JSON.stringify({
@@ -776,17 +790,68 @@ class MeshClient extends LiteEventEmitter {
           signal
         });
         this.emit(MeshClientEvents.PEER_SIGNAL, peer, signal);
-      }
+      } // PubSub
+
     };
+    this.subscriptions = [];
+    this.on('subscribe', (peer, {
+      payload: {
+        topic
+      }
+    }, res) => {
+      if (!peer.subscriptions.includes(topic)) peer.subscriptions.push(topic);
+      res.send(this.subscriptions.includes(topic));
+    });
+    this.on('unsubscribe', (peer, {
+      payload: {
+        topic
+      }
+    }, res) => {
+      const index = peer.subscriptions.indexOf(topic);
+      if (index != -1) peer.subscriptions.splice(index, 1);
+      res.send(this.subscriptions.includes(topic));
+    });
   }
 
-  send(peerName, type, data) {
-    return this.peers[peerName].send(type, data);
+  send(peerName, type, data, timeout = undefined) {
+    return this.peers[peerName].send(type, data, timeout);
   }
 
-  broadcast(type, data, filterFn = null) {
-    const promises = Object.values(this.peers).filter(x => x._peer.isConnected()).filter(x => filterFn == null || filterFn(x)).map(peer => peer.send(type, data));
+  broadcast(type, data, filterFn = null, timeout = undefined) {
+    const promises = Object.values(this.peers).filter(x => x._peer.isConnected()).filter(x => filterFn == null || filterFn(x)).map(peer => peer.send(type, data, timeout));
+    if (promises.length === 0) return Promise.reject('No peers');
     return raceToSuccess(promises);
+  }
+
+  subscribe(topic, data = {}) {
+    this.subscriptions.push(topic);
+    const promises = Object.values(this.peers).filter(x => x._peer.isConnected()).map(peer => new Promise(async (resolve, reject) => {
+      try {
+        const isSubscribed = await peer.send('subscribe', {
+          topic,
+          ...data
+        });
+        const subscriptionIndex = peer.subscriptions.indexOf(topic);
+        if (isSubscribed && subscriptionIndex == -1) peer.subscriptions.push(topic);else if (!isSubscribed && subscriptionIndex != -1) peer.subscriptions.splice(subscriptionIndex, 1);
+        resolve(isSubscribed);
+      } catch {
+        reject('Timeout');
+      }
+    }));
+    return allSuccesses(promises);
+  }
+
+  unsubscribe(topic, data = {}) {
+    const subscriptionIndex = this.subscriptions.indexOf(topic);
+    if (subscriptionIndex != -1) this.subscriptions.splice(subscriptionIndex, 1);
+    return this.broadcast('unsubscribe', {
+      topic,
+      ...data
+    });
+  }
+
+  publish(topic, type, data, timeout = undefined) {
+    return this.broadcast(type, data, x => x.subscriptions.includes(topic), timeout);
   }
 
 }
