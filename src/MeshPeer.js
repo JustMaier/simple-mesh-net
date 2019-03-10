@@ -1,5 +1,5 @@
 import { uuid } from './utility';
-import LiteEventEmitter from 'lite-event-emitter';
+import LiteEventEmitter from 'lite-ee';
 import WebRTCPeer from 'webrtc-link';
 
 export const MeshPeerEvents = {
@@ -14,7 +14,7 @@ export default class MeshPeer extends LiteEventEmitter {
             peerConnectionConfig: {
                 iceServers: [
                     { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:global.stun.twilio.com:3478?transport=udp' }
+					{ urls: 'stun:global.stun.twilio.com:3478?transport=udp' }
                 ]
             },
             ...options

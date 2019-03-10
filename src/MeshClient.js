@@ -1,5 +1,5 @@
 import { WrappedWebSocket, raceToSuccess, allSuccesses } from './utility';
-import LiteEventEmitter from 'lite-event-emitter';
+import LiteEventEmitter from 'lite-ee';
 import MeshPeer from './MeshPeer';
 
 export const MeshClientEvents = {
@@ -26,7 +26,7 @@ export default class MeshClient extends LiteEventEmitter {
                 this.peers[peerName] = new MeshPeer(this, peerName, { isInitiator: true });
             })
             .on('signal', ({ peerName, signal }) => {
-                this.options.logger('signal from', peerName);
+                this.options.logger('signal from', peerName, signal);
                 const peer = this.peers[peerName] = this.peers[peerName] || new MeshPeer(this, peerName);
 
                 peer._peer.signal(signal);

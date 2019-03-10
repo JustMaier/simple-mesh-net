@@ -769,7 +769,7 @@ class MeshClient extends LiteEventEmitter {
       peerName,
       signal
     }) => {
-      this.options.logger('signal from', peerName);
+      this.options.logger('signal from', peerName, signal);
       const peer = this.peers[peerName] = this.peers[peerName] || new MeshPeer(this, peerName);
 
       peer._peer.signal(signal);

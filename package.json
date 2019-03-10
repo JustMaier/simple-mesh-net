@@ -1,6 +1,6 @@
 {
 	"name": "simple-mesh-net",
-	"version": "1.1.0",
+	"version": "1.1.1",
 	"description": "A lightweight p2p data mesh net client for the browser using WebRTC",
 	"main": "dist/index.js",
 	"module": "dist/index.es.js",
@@ -29,7 +29,7 @@
 		"url": "https://github.com/justmaier/simple-mesh-net.git"
 	},
 	"dependencies": {
-		"lite-event-emitter": "git+https://github.com/justmaier/lite-event-emitter.git",
+		"lite-ee": "^1.0.1",
 		"webrtc-link": "git+https://github.com/JustMaier/webrtc-link.git"
 	},
 	"devDependencies": {

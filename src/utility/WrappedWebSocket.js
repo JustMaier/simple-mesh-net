@@ -1,4 +1,4 @@
-import LiteEventEmitter from 'lite-event-emitter';
+import LiteEventEmitter from 'lite-ee';
 
 export default class WrappedWebSocket extends LiteEventEmitter{
     constructor(endpoint) {
