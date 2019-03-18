@@ -27,7 +27,7 @@ export default class MeshPeer extends LiteEventEmitter {
 
         this._peer.on('data', (data) => {
             const { id, type, payload } = JSON.parse(data);
-            const req = { id, peer: this._peer, payload };
+            const req = { id, peer: this, payload };
             const res = { send: (responseData) => {
                 this._peer.send(JSON.stringify({ id, type: 'response', payload: responseData }));
                 res.send = () => console.warn('Already sent response', id);

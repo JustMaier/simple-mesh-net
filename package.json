@@ -1,6 +1,6 @@
 {
 	"name": "simple-mesh-net",
-	"version": "1.1.1",
+	"version": "1.1.2",
 	"description": "A lightweight p2p data mesh net client for the browser using WebRTC",
 	"main": "dist/index.js",
 	"module": "dist/index.es.js",
@@ -30,7 +30,7 @@
 	},
 	"dependencies": {
 		"lite-ee": "^1.0.1",
-		"webrtc-link": "git+https://github.com/JustMaier/webrtc-link.git"
+		"webrtc-link": "^1.3.0"
 	},
 	"devDependencies": {
 		"@babel/cli": "^7.2.3",
