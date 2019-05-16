@@ -76,6 +76,10 @@ class WrappedWebSocket extends LiteEventEmitter {
 
     socket.onopen = () => this.emit('open', this);
 
+    this.on('open', () => {
+      setInterval(() => this.send('ping', null), 10 * 1000);
+    });
+
     this.send = (type, payload) => socket.send(JSON.stringify({
       type,
       payload
@@ -90,13 +94,13 @@ var utils = {
 	isChromium: isChromium
 };
 
-function createError(message, code) {
+function createError$1(message, code) {
   const err = new Error(message);
   err.code = code;
   return err;
 }
 
-var createError_1 = createError;
+var createError_1 = createError$1;
 
 function parseOptions(inputOptions) {
   const userOptions = inputOptions || {};
@@ -143,7 +147,7 @@ var SET_REMOTE_DESCRIPTION = 'ERR_SET_REMOTE_DESCRIPTION';
 var SIGNALING = 'ERR_SIGNALING';
 var WEBRTC_SUPPORT = 'ERR_WEBRTC_SUPPORT';
 
-var errorCodes = {
+var errorCodes$1 = {
 	ADD_ICE_CANDIDATE: ADD_ICE_CANDIDATE,
 	CREATE_ANSWER: CREATE_ANSWER,
 	CREATE_OFFER: CREATE_OFFER,
@@ -223,7 +227,7 @@ class WebRTCPeer extends LiteEventEmitter {
 
   getStats() {
     if (this._isDestroyed) {
-      throw createError_1('cannot getStats after peer is destroyed', errorCodes.PEER_IS_DESTROYED);
+      throw createError_1('cannot getStats after peer is destroyed', errorCodes$1.PEER_IS_DESTROYED);
     }
 
     return this._peerConnection.getStats();
@@ -243,7 +247,7 @@ class WebRTCPeer extends LiteEventEmitter {
 
   removeTrack(track) {
     if (!this._mediaTracksMap.has(track)) {
-      throw createError_1('cannot remove track that was never added or has already been removed', errorCodes.REMOVE_TRACK);
+      throw createError_1('cannot remove track that was never added or has already been removed', errorCodes$1.REMOVE_TRACK);
     }
 
     const rtcRtpSender = this._mediaTracksMap.get(track);
@@ -253,7 +257,7 @@ class WebRTCPeer extends LiteEventEmitter {
 
   send(data) {
     if (this._isDestroyed) {
-      throw createError_1('cannot call send after peer is destroyed', errorCodes.PEER_IS_DESTROYED);
+      throw createError_1('cannot call send after peer is destroyed', errorCodes$1.PEER_IS_DESTROYED);
     }
 
     this._dataChannel.send(data);
@@ -263,7 +267,7 @@ class WebRTCPeer extends LiteEventEmitter {
     const self = this;
 
     if (self._isDestroyed) {
-      throw createError_1('cannot signal after peer is destroyed', errorCodes.SIGNALING);
+      throw createError_1('cannot signal after peer is destroyed', errorCodes$1.SIGNALING);
     }
 
     let signalData = data;
@@ -283,12 +287,12 @@ class WebRTCPeer extends LiteEventEmitter {
     } else if (signalData.renegotiate) {
       self._onNegotiationNeeded();
     } else {
-      const destroyError = createError_1('signal called with invalid signal data', errorCodes.SIGNALING);
+      const destroyError = createError_1('signal called with invalid signal data', errorCodes$1.SIGNALING);
       self.destroy(destroyError);
     }
 
     function onAddIceCandidateError(err) {
-      const destroyError = createError_1(err, errorCodes.ADD_ICE_CANDIDATE);
+      const destroyError = createError_1(err, errorCodes$1.ADD_ICE_CANDIDATE);
       self.destroy(destroyError);
     }
   }
@@ -307,7 +311,7 @@ class WebRTCPeer extends LiteEventEmitter {
     }
 
     function onSetRemoteDescriptionError(err) {
-      const destroyError = createError_1(err, errorCodes.SET_REMOTE_DESCRIPTION);
+      const destroyError = createError_1(err, errorCodes$1.SET_REMOTE_DESCRIPTION);
       self.destroy(destroyError);
     }
   }
@@ -407,12 +411,12 @@ class WebRTCPeer extends LiteEventEmitter {
     }
 
     function onCreateAnswerError(err) {
-      const destroyError = createError_1(err, errorCodes.CREATE_ANSWER);
+      const destroyError = createError_1(err, errorCodes$1.CREATE_ANSWER);
       self.destroy(destroyError);
     }
 
     function onSetLocalDescriptionError(err) {
-      const destroyError = createError_1(err, errorCodes.SET_LOCAL_DESCRIPTION);
+      const destroyError = createError_1(err, errorCodes$1.SET_LOCAL_DESCRIPTION);
       self.destroy(destroyError);
     }
 
@@ -498,9 +502,9 @@ class WebRTCPeer extends LiteEventEmitter {
     const iceConnectionState = self._peerConnection.iceConnectionState;
 
     if (iceConnectionState === 'failed') {
-      self.destroy(createError_1('Ice connection failed.', errorCodes.ICE_CONNECTION_FAILURE));
+      self.destroy(createError_1('Ice connection failed.', errorCodes$1.ICE_CONNECTION_FAILURE));
     } else if (iceConnectionState === 'closed') {
-      self.destroy(createError_1('ice connection closed', errorCodes.ICE_CONNECTION_CLOSED));
+      self.destroy(createError_1('ice connection closed', errorCodes$1.ICE_CONNECTION_CLOSED));
     }
   }
 
@@ -537,11 +541,11 @@ class WebRTCPeer extends LiteEventEmitter {
     }
 
     function onCreateOfferError(err) {
-      self.destroy(createError_1(err, errorCodes.CREATE_OFFER));
+      self.destroy(createError_1(err, errorCodes$1.CREATE_OFFER));
     }
 
     function onSetLocalDescriptionError(err) {
-      self.destroy(createError_1(err, errorCodes.SET_LOCAL_DESCRIPTION));
+      self.destroy(createError_1(err, errorCodes$1.SET_LOCAL_DESCRIPTION));
     }
 
     function sendOffer() {
@@ -574,7 +578,7 @@ class WebRTCPeer extends LiteEventEmitter {
 
     self._dataChannel.onerror = function (errorEvent) {
       const errorMessage = errorEvent.message;
-      const errorCode = errorCodes.DATA_CHANNEL;
+      const errorCode = errorCodes$1.DATA_CHANNEL;
       const destroyError = createError_1(errorMessage, errorCode);
       self.destroy(destroyError);
     };
@@ -637,11 +641,11 @@ class WebRTCPeer extends LiteEventEmitter {
 
   _checkWebRTCSupport() {
     if (typeof window === 'undefined') {
-      throw createError_1('WebRTC is not supported in this environment', errorCodes.WEBRTC_SUPPORT);
+      throw createError_1('WebRTC is not supported in this environment', errorCodes$1.WEBRTC_SUPPORT);
     }
 
     if (window.RTCPeerConnection == null) {
-      throw createError_1('WebRTC is not supported in this browser', errorCodes.WEBRTC_SUPPORT);
+      throw createError_1('WebRTC is not supported in this browser', errorCodes$1.WEBRTC_SUPPORT);
     }
 
     if (!('createDataChannel' in window.RTCPeerConnection.prototype)) {
@@ -656,11 +660,62 @@ var dist = WebRTCPeer;
 const MeshPeerEvents = {
   DATA: 'data'
 };
+
+class WebSocketFallbackPeer extends dist {
+  constructor({
+    fallbackDelay = 5000,
+    ...webRTCPeerOptions
+  } = {}) {
+    super(webRTCPeerOptions); // Add fallback
+
+    this._isWS = false;
+    let fallbackTimeout;
+    this.on('signal', () => {
+      if (fallbackTimeout) clearTimeout(fallbackTimeout);
+      fallbackTimeout = setTimeout(() => this.fallbackToWS(), fallbackDelay);
+    });
+    this.on('connect', () => {
+      if (fallbackTimeout) clearTimeout(fallbackTimeout);
+    });
+  }
+
+  isWS() {
+    return !this._isDestroyed && this._isWS();
+  }
+
+  fallbackToWS() {
+    this._isWS = true;
+
+    this._removeDataChannelHandlers();
+
+    this._removePeerConnectionHandlers();
+
+    this._dataChannel = null;
+    this._peerConnection = null;
+    this.on('socket:disconnect', () => this.destroy());
+
+    this._onChannelOpen();
+  }
+
+  sendString(str) {
+    if (this._isDestroyed) {
+      throw createError('cannot call send after peer is destroyed', errorCodes.PEER_IS_DESTROYED);
+    }
+
+    this._dataChannel.send(str);
+  }
+
+  send(data) {
+    if (this._isWS) this.emit('socket:send', data);else this.sendString(typeof data !== 'string' ? JSON.stringify(data) : data);
+  }
+
+}
+
 class MeshPeer extends LiteEventEmitter {
   constructor(client, peerName, options) {
     super();
     this.peerName = peerName;
-    this._peer = new dist({
+    this._peer = new WebSocketFallbackPeer({
       peerConnectionConfig: {
         iceServers: [{
           urls: 'stun:stun.l.google.com:19302'
@@ -679,24 +734,27 @@ class MeshPeer extends LiteEventEmitter {
 
     this._peer.on('connect', () => client._peerEvents.connect(this));
 
+    this._peer.on('socket:send', data => client._peerEvents.send(this, data));
+
     this._peer.on('data', data => {
+      if (typeof data === 'string') data = JSON.parse(data);
       const {
         id,
         type,
         payload
-      } = JSON.parse(data);
+      } = data;
       const req = {
         id,
-        peer: this._peer,
+        peer: this,
         payload
       };
       const res = {
         send: responseData => {
-          this._peer.send(JSON.stringify({
+          this._peer.send({
             id,
             type: 'response',
             payload: responseData
-          }));
+          });
 
           res.send = () => console.warn('Already sent response', id);
         }
@@ -732,11 +790,11 @@ class MeshPeer extends LiteEventEmitter {
         timeout: setTimeout(() => reject('Request timed out'), timeout)
       };
 
-      this._peer.send(JSON.stringify({
+      this._peer.send({
         id,
         type,
         payload
-      }));
+      });
     });
   }
 
@@ -758,7 +816,9 @@ class MeshClient extends LiteEventEmitter {
       ...options
     };
     this.peers = {};
-    const signalSocket = new WrappedWebSocket(this.options.signalServer).on('discovered', ({
+    const signalSocket = new WrappedWebSocket(this.options.signalServer).on('open', () => signalSocket.send('discover', {
+      peerName: this.peerName
+    })).on('discovered', ({
       peerName
     }) => {
       this.options.logger('discovered', peerName);
@@ -773,9 +833,26 @@ class MeshClient extends LiteEventEmitter {
       const peer = this.peers[peerName] = this.peers[peerName] || new MeshPeer(this, peerName);
 
       peer._peer.signal(signal);
-    }).on('open', () => signalSocket.send('discover', {
-      peerName: this.peerName
-    }));
+    }).on('data', ({
+      peerName,
+      id,
+      type,
+      payload
+    }) => {
+      const peer = this.peers[peerName];
+
+      peer._peer.emit('data', {
+        id,
+        type,
+        payload
+      });
+    }).on('disconnected', ({
+      peerName
+    }) => {
+      const peer = this.peers[peerName];
+
+      peer._peer.emit('socket:disconnect');
+    });
     this._peerEvents = {
       error: (peer, err) => this.emit(MeshClientEvents.PEER_ERROR, peer, err),
       close: peer => {
@@ -790,6 +867,12 @@ class MeshClient extends LiteEventEmitter {
           signal
         });
         this.emit(MeshClientEvents.PEER_SIGNAL, peer, signal);
+      },
+      send: (peer, data) => {
+        signalSocket.send('data', {
+          peerName: peer.peerName,
+          ...data
+        });
       } // PubSub
 
     };
@@ -857,4 +940,4 @@ class MeshClient extends LiteEventEmitter {
 }
 
 export default MeshClient;
-export { MeshPeer, MeshPeerEvents, MeshClientEvents };
+export { MeshClientEvents, MeshPeer, MeshPeerEvents };
