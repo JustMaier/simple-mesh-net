@@ -1,6 +1,6 @@
 {
 	"name": "simple-mesh-net",
-	"version": "1.2.0",
+	"version": "1.2.1",
 	"description": "A lightweight p2p data mesh net client for the browser using WebRTC",
 	"main": "dist/index.js",
 	"module": "dist/index.es.js",
